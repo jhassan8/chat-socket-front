@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Client } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';  
+import { Message } from './models/message';
 
 @Component({
   selector: 'app-chat',
@@ -10,6 +11,10 @@ import * as SockJS from 'sockjs-client';
 export class ChatComponent implements OnInit {
 
   private client: Client;
+  public connected: boolean;
+
+  public message: Message = new Message();
+  public messages: Message[] = [];
 
   constructor() { }
 
@@ -21,9 +26,30 @@ export class ChatComponent implements OnInit {
 
     this.client.onConnect = ( frame ) => {
       console.log('Connected: ' + this.client.connected + ' : ' + frame);
+      this.connected = true;
+      this.client.subscribe('/chat/message', e => {
+        let message: Message = JSON.parse(e.body) as Message;
+        message.date = new Date(message.date);
+        this.messages.push(message);
+      });
     }
 
+    this.client.onDisconnect = ( frame ) => {
+      console.log('Disconnected: ' + !this.client.connected + ' : ' + frame);
+      this.connected = false;
+    }
+  }
+
+  connect() {
     this.client.activate();
   }
 
+  disconnect() {
+    this.client.deactivate();
+  }
+
+  send() {
+    this.client.publish({destination: '/app/message', body: JSON.stringify(this.message)});
+    this.message.message = '';
+  }
 }
