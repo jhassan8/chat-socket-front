@@ -4,6 +4,7 @@ export class Message {
     date: Date;
     username: string;
     type: string;
+    color: string;
 
     constructor(message?: Message) {
 
@@ -11,6 +12,7 @@ export class Message {
         this.date = null;
         this.username = '';
         this.type = '';
+        this.color = '';
 
         if (message) {
             Object.assign(this, message);

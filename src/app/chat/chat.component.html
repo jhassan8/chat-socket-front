@@ -12,11 +12,11 @@
             </li>
         </ul>
     </div>
-    <div *ngIf="connected" class="card-body" style="overflow-y: scroll; height: 360px;">
+    <div #scroll [scrollTop]="scroll.scrollHeight" *ngIf="connected" class="card-body" style="overflow-y: scroll; height: 360px;">
         <ul class="list-group list-group-flush">
             <li *ngFor="let m of messages" class="list-group-item list-group-item-light">
                 {{m.date | date: 'shortTime'}} @ 
-                <span *ngIf="m.type == 'MESSAGE'">{{m.username}} say: </span>
+                <span *ngIf="m.type == 'MESSAGE'" [ngStyle]="{'color': m.color}">{{m.username}} say: </span>
                 {{m.message}}
             </li>
         </ul>
@@ -24,9 +24,10 @@
     <div *ngIf="connected" class="card-footer">
         <form class="form-inline mx-3">
             <div class="form-group">
-                <input name="message" type="text" [(ngModel)]="message.message" placeholder="Write your message..." class="form-control">
+                <input (keyup)="writing()" name="message" type="text" [(ngModel)]="message.message" placeholder="Write your message..." class="form-control">
             </div>
             <button class="btn btn-primary" (click)="send()">Send</button>
         </form>
+        <p>{{writingvalue}}</p>
     </div>
 </div>

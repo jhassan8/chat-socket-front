@@ -16,6 +16,8 @@ export class ChatComponent implements OnInit {
   public message: Message = new Message();
   public messages: Message[] = [];
 
+  public writingvalue: string;
+
   constructor() { }
 
   ngOnInit() {
@@ -27,10 +29,22 @@ export class ChatComponent implements OnInit {
     this.client.onConnect = ( frame ) => {
       console.log('Connected: ' + this.client.connected + ' : ' + frame);
       this.connected = true;
+
       this.client.subscribe('/chat/message', e => {
         let message: Message = JSON.parse(e.body) as Message;
         message.date = new Date(message.date);
+
+        if(!this.message.color && message.type == "CONNECTED" 
+            && this.message.username == message.username) {
+          this.message.color = message.color;
+        }
+
         this.messages.push(message);
+      });
+
+      this.client.subscribe('/chat/writing', e => {
+        this.writingvalue= e.body;
+        setTimeout(() => this.writingvalue = '', 3000);
       });
 
       this.message.type = "CONNECTED";
@@ -49,6 +63,10 @@ export class ChatComponent implements OnInit {
 
   disconnect() {
     this.client.deactivate();
+  }
+
+  writing() {
+    this.client.publish({destination: '/app/writing', body: this.message.username});
   }
 
   send() {
